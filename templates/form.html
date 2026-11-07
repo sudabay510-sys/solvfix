@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Free audit{% endblock %}{% block body %}
+<div class=card style="max-width:620px;margin:auto"><h1>Free business listing audit</h1>
+<p class=mute>{% if user %}Your results will be saved to your dashboard with a fix checklist.{% else %}<a href="/signup">Sign up</a> to save results and get a fix checklist.{% endif %}</p>
+<form method=post action="/audit"><label>Business name</label><input name=name required>
+<label>Street address (e.g. 123 Main St, San Francisco, CA 94103)</label><input name=address required>
+<label>City (optional, helps search)</label><input name=city><label>Phone</label><input name=phone required>
+<label><input type=checkbox name=nosearch style="width:auto;margin:0 6px 0 0"> Skip web-search sources (faster)</label><br><br>
+<button>Run audit</button></form></div>{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Audit: {{r.business.name}}{% endblock %}{% block body %}
+<div class=card><h1>Listing audit: {{r.business.name}}</h1><p class=mute>{{r.business.address}} · {{r.business.phone}}{% if created %} · {{created}} UTC{% endif %}</p>
+<div class=big>{{r.overall}}%</div><p>Overall NAP score · Listed on {{r.listed}} of {{r.checked}} sources checked</p>
+{% if aid %}<a class=btn href="/audits/{{aid}}/fix">Open fix checklist</a> <a class="btn ghost" href="/social">Make social posts</a>{% else %}<a class=btn href="/signup">Sign up to save and fix</a>{% endif %}</div>
+<div class="card tbl"><table><tr><th>Source</th><th>Status</th><th>Score</th><th>Name / Addr / Phone</th><th>What we found</th><th>Missing / notes</th></tr>
+{% for x in r.results %}<tr><td>{{x.source}}</td>
+<td><span class="pill {{'nl' if x.status=='Not listed' else 'sk' if x.status in ('Skipped','Error') else 'ok'}}">{{x.status}}</span></td>
+<td>{{ (x.score ~ '%') if x.score is defined else '—' }}</td>
+<td>{% if x.details %}{{x.details.name}}% / {{x.details.address}}% / {{x.details.phone}}%{% endif %}</td>
+<td>{% if x.url %}<a href="{{x.url}}" target=_blank rel=noopener>{{x.found_name}}</a><br>{{x.found_address or ''}} {{x.found_phone or ''}}{% endif %}</td>
+<td>{{ x.missing|join(', ') if x.missing }} {{x.note or ''}}</td></tr>{% endfor %}</table></div>
+<p class=mute><small>Weights: name 40%, address 35%, phone 25%. Search-result rows are scored from the search snippet only and should be verified.</small></p>
+<p><a href="/audit">New audit</a></p>{% endblock %}

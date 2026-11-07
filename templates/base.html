@@ -1,0 +1,30 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>{% block title %}SolvFix{% endblock %} | SolvFix Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel=stylesheet>
+<style>
+:root{--navy:#0B1F3A;--teal:#14B8A6;--mist:#E6F7F5;--amber:#F59E0B;--ink:#1F2937;--mute:#6B7280;--red:#DC2626}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,sans-serif;color:var(--ink);background:#F8FAFB}
+h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;color:var(--navy);margin:0 0 .5em}
+a{color:#0f8f82}.wrap{max-width:1100px;margin:auto;padding:24px}
+header{background:#fff;border-bottom:1px solid #e5e7eb}
+nav{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;align-items:center;max-width:1100px;margin:auto;padding:14px 24px}
+nav .links{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}nav .links a{color:var(--ink);text-decoration:none;font-weight:500}
+.logo{font-family:'Plus Jakarta Sans';font-weight:800;font-size:22px;color:var(--navy);text-decoration:none}.logo span{color:var(--teal)}
+.btn,button{display:inline-block;background:var(--teal);color:#fff!important;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:0;cursor:pointer;font:inherit;font-weight:600}
+.btn.ghost,button.ghost{background:#fff;color:var(--navy)!important;border:1px solid #cbd5e1}button.warn{background:var(--amber)}button.small,.btn.small{padding:6px 12px;font-size:14px}
+.card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 4px 18px rgba(11,31,58,.07);margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin:4px 0 14px}
+label{font-weight:500;font-size:14px}.mute{color:var(--mute)}.flash{background:var(--mist);border-left:4px solid var(--teal);padding:10px 14px;border-radius:6px;margin-bottom:14px}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;background:#fff}td,th{border-bottom:1px solid #e5e7eb;padding:9px;font-size:14px;text-align:left;vertical-align:top}th{background:var(--mist);color:var(--navy)}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600}.ok{background:#d1fae5;color:#065f46}.nl{background:#fee2e2;color:#991b1b}.sk{background:#f3f4f6;color:#6b7280}.dr{background:#fef3c7;color:#92400e}
+.big{font-family:'Plus Jakarta Sans';font-size:44px;font-weight:800;color:var(--navy)}
+footer{padding:26px;text-align:center;color:var(--mute);font-size:13px}
+@media(max-width:600px){.wrap{padding:14px}.big{font-size:34px}td,th{font-size:13px;padding:6px}}
+</style></head><body>
+<header><nav><a class=logo href="/">Solv<span>Fix</span></a><div class=links>
+<a href="/audit">Free audit</a>{% if user %}<a href="/dashboard">Dashboard</a><a href="/reviews">Reviews</a><a href="/social">Social</a><a href="/logout">Log out</a>
+{% else %}<a href="/login">Log in</a><a class="btn small" href="/signup">Sign up</a>{% endif %}</div></nav></header>
+<main class=wrap>{% for m in get_flashed_messages() %}<div class=flash>{{m}}</div>{% endfor %}{% block body %}{% endblock %}</main>
+<footer>© SolvFix Solutions · Local prototype · We never create fake reviews or fake listings, and nothing is posted automatically.</footer>
+</body></html>

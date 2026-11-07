@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Fix checklist{% endblock %}{% block body %}
+{% set done = items|selectattr('done')|list|length %}
+<div class=card><h1>Fix checklist: {{a.name}}</h1><p class=mute>Bot 2 v1 · Guided steps from your audit. You make each change on the site yourself; SolvFix doesn't log in anywhere for you yet.</p>
+<p><b>{{done}} of {{items|length}}</b> done · Use exactly: <b>{{a.name}} | {{a.address}} | {{a.phone}}</b></p></div>
+{% for it in items %}<div class=card style="{{'opacity:.6' if it.done}}"><h3>{{it.site}} <span class="pill {{'ok' if it.done else 'nl' if it.issue=='Not listed' else 'dr'}}">{{'Done' if it.done else it.issue}}</span></h3>
+<p>{{it.steps}}</p>{% if it.claim_url %}<p><a href="{{it.claim_url}}" target=_blank rel=noopener>Claim / edit page ↗</a></p>{% endif %}
+<form method=post><input type=hidden name=item value="{{it.id}}"><input type=hidden name=done value="{{0 if it.done else 1}}">
+<button class="small {{'ghost' if it.done}}">{{'Mark not done' if it.done else 'Mark done'}}</button></form></div>{% endfor %}
+<p><a href="/audits/{{a.id}}">Back to report</a></p>{% endblock %}

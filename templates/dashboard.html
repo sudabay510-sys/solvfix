@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Dashboard{% endblock %}{% block body %}
+<h1>Your dashboard</h1><p class=mute>{{user}}</p>
+<div class=grid><div class=card><h3>1 · Audit</h3><p>{{audits|length}} saved audit(s)</p><a class="btn small" href="/audit">Run an audit</a></div>
+<div class=card><h3>3 · Reviews</h3><p>{{nrev}} review(s) in your inbox</p><a class="btn small" href="/reviews">Open inbox</a></div>
+<div class=card><h3>4 · Social</h3><p>{{batches|length}} month(s) of post drafts</p><a class="btn small" href="/social">Generate posts</a></div></div>
+<div class="card tbl"><h2>Audit history</h2>{% if audits %}<table><tr><th>Date (UTC)</th><th>Business</th><th>Address</th><th>Phone</th><th>Score</th><th>Fixes done</th><th></th></tr>
+{% for a in audits %}<tr><td>{{a.created}}</td><td>{{a.name}}</td><td>{{a.address}}</td><td>{{a.phone}}</td><td><b>{{a.score}}%</b></td><td>{{a.d}} / {{a.n}}</td>
+<td><a href="/audits/{{a.id}}">Report</a> · <a href="/audits/{{a.id}}/fix">Fix</a></td></tr>{% endfor %}</table>{% else %}<p class=mute>No audits yet.</p>{% endif %}</div>
+{% if batches %}<div class="card tbl"><h2>Social post batches</h2><table>{% for b in batches %}<tr><td>{{b.month}}</td><td>{{b.business}}</td><td>{{b.source}}</td><td><a href="/social/{{b.id}}">Open</a> · <a href="/social/{{b.id}}.csv">CSV</a></td></tr>{% endfor %}</table></div>{% endif %}
+{% endblock %}

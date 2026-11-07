@@ -1,0 +1,4 @@
+flask>=3.0
+requests>=2.32
+ddgs>=9.0
+gunicorn>=23.0

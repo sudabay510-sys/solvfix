@@ -1,0 +1,60 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>SolvFix Solutions | Your business, found and trusted</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Inter:wght@400;500&display=swap" rel=stylesheet>
+<style>
+:root{--navy:#0B1F3A;--teal:#14B8A6;--sky:#E6F7F5;--amber:#F59E0B;--ink:#1F2937;--mute:#6B7280}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,sans-serif;color:var(--ink)}
+h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;margin:0 0 .5em}
+.wrap{max-width:1100px;margin:auto;padding:0 24px}
+nav{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:18px 24px;max-width:1100px;margin:auto}
+.logo{font-family:'Plus Jakarta Sans';font-weight:800;font-size:22px;color:var(--navy)}.logo span{color:var(--teal)}
+nav a{margin-left:16px;line-height:2.4;color:var(--ink);text-decoration:none}
+.btn{display:inline-block;background:var(--teal);color:#fff!important;padding:14px 26px;border-radius:10px;font-weight:600;text-decoration:none}
+.btn.alt{background:transparent;border:2px solid #fff}
+.hero{background:linear-gradient(135deg,var(--navy),#123d63);color:#fff;padding:90px 0}
+.hero h1{font-size:clamp(34px,5vw,56px);line-height:1.1;max-width:760px}.hero p{font-size:20px;opacity:.9;max-width:640px}
+section{padding:72px 0}.alt-bg{background:var(--sky)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.card{background:#fff;border-radius:14px;padding:26px;box-shadow:0 4px 18px rgba(11,31,58,.08)}
+.card .ico{font-size:30px}.num{display:inline-block;width:38px;height:38px;border-radius:50%;background:var(--teal);color:#fff;text-align:center;line-height:38px;font-weight:700}
+.price{font-size:34px;font-weight:800;color:var(--navy)}.mute{color:var(--mute)}
+.cta{background:var(--navy);color:#fff;text-align:center}footer{padding:30px;text-align:center;color:var(--mute);font-size:14px}
+</style></head><body>
+<nav><div class=logo>Solv<span>Fix</span></div><div><a href="#what">What we do</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="/brand">Brand</a>{% if user %}<a href="/dashboard">Dashboard</a>{% else %}<a href="/login">Log in</a>{% endif %}<a class=btn href="/audit">Free audit</a></div></nav>
+<div class=hero><div class=wrap>
+<h1>Your business, found, accurate, and trusted everywhere online.</h1>
+<p>SolvFix checks where your business appears across directories, maps, and social sites, finds wrong or missing info, and helps you fix it. We've been helping small businesses since 2019.</p>
+<p><a class=btn href="/audit">Run my free listing audit</a> &nbsp; <a class="btn alt" href="#how">See how it works</a></p>
+</div></div>
+<section id=what><div class=wrap>
+<h2>What we do</h2><p class=mute>We help small and medium businesses take control of three things customers check before they call:</p>
+<div class=grid>
+<div class=card><div class=ico>🪪</div><h3>Digital identity</h3><p>The same name, address, and phone number on every listing, so customers and search engines can trust it.</p></div>
+<div class=card><div class=ico>⭐</div><h3>Reputation</h3><p>All your reviews in one inbox, with thoughtful reply drafts that you approve. We only work with real reviews.</p></div>
+<div class=card><div class=ico>🌐</div><h3>Footprint</h3><p>Find out where you're listed, where you're missing, and what's incomplete, then fill the gaps.</p></div>
+</div></div></section>
+<section class=alt-bg><div class=wrap>
+<h2>Four assistants working for your business</h2>
+<div class=grid>
+<div class=card><h3>1 · Audit Bot</h3><p>Checks your business across directories, maps, and social sites. Scores how well your name, address, and phone match, and flags where you're "Not listed."</p></div>
+<div class=card><h3>2 · Fix Bot</h3><p>Connects to supported platforms like Google and Facebook with your permission to correct details. On every other site, it gives you a step-by-step claim checklist.</p></div>
+<div class=card><h3>3 · Review Bot</h3><p>Brings reviews from connected platforms into one place and drafts replies. Nothing is posted until you approve it.</p></div>
+<div class=card><h3>4 · Social Bot</h3><p>Writes 30 social post drafts each month, tailored to your business. You edit and approve each one.</p></div>
+</div></div></section>
+<section id=how><div class=wrap>
+<h2>How it works</h2><div class=grid>
+<div><span class=num>1</span><h3>Enter your business</h3><p class=mute>Your name, address, and phone number. It takes about a minute.</p></div>
+<div><span class=num>2</span><h3>Get your free report</h3><p class=mute>See where you're listed, a match score for each listing, and what's missing.</p></div>
+<div><span class=num>3</span><h3>Fix and grow</h3><p class=mute>Choose a plan, connect your accounts, and work through the fixes with us.</p></div>
+</div></div></section>
+<section id=pricing class=alt-bg><div class=wrap>
+<h2>Simple pricing</h2><p class=mute>The plans below are planned. Pricing will be confirmed at launch.</p>
+<div class=grid>
+<div class=card><h3>Free Audit</h3><div class=price>$0</div><p>Listing check and match score.</p></div>
+<div class=card><h3>Starter</h3><div class=price>$49<small>/mo</small></div><p>Monthly audits, Google and Facebook connections, review inbox.</p></div>
+<div class=card><h3>Growth</h3><div class=price>$99<small>/mo</small></div><p>Everything in Starter, plus 30 social post drafts a month and weekly re-checks.</p></div>
+<div class=card><h3>Done-for-you</h3><div class=price>$199<small>/mo</small></div><p>Plus a $299 setup fee. Our team handles the manual claims and fixes.</p></div>
+</div></div></section>
+<section class=cta><div class=wrap><h2>See how your business shows up online</h2><p>The audit is free and takes about a minute. No credit card needed.</p><a class=btn href="/audit">Start my free audit</a></div></section>
+<footer>© SolvFix Solutions · We never create fake reviews or fake listings · Consistent listings support local search, but no one can guarantee rankings.</footer>
+</body></html>
