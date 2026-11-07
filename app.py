@@ -46,6 +46,27 @@ def check_form_token():
 @app.route("/")
 def landing(): return render_template("landing.html")
 
+# Only public marketing pages belong in crawler discovery (never saved reports).
+PUBLIC_MARKETING_PATHS = (
+    "/", "/audit", "/services", "/gbp", "/reviews/request",
+    "/competitors", "/inquire", "/brand", "/signup",
+)
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    from xml.etree.ElementTree import Element, SubElement, tostring
+    root = Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+    for path in PUBLIC_MARKETING_PATHS:
+        SubElement(SubElement(root, "url"), "loc").text = request.url_root.rstrip("/") + path
+    return Response(tostring(root, encoding="utf-8", xml_declaration=True), mimetype="application/xml")
+
+
+@app.get("/robots.txt")
+def robots():
+    return Response("User-agent: *\nAllow: /\nSitemap: " + url_for("sitemap", _external=True) + "\n", mimetype="text/plain")
+
+
 @app.route("/brand")
 def brand(): return render_template("brand.html")
 

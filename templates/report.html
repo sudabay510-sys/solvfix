@@ -29,6 +29,7 @@
 <td>{% if x.url %}<a href="{{x.url}}" target="_blank" rel="noopener noreferrer">{{x.found_name or 'View source'}}</a>{% else %}{{x.found_name or ''}}{% endif %}<br>{{x.found_address or ''}} {{x.found_phone or ''}}</td>
 <td>{{ x.missing|join(', ') if x.missing }} {{x.note or ''}}</td></tr>{% endfor %}</table></div></details>
 <p class=mute><small>“Not listed” means no matching search result was found — verify before acting. Weights: name 40%, address 35%, phone 25%. Search-result rows are scored from the search snippet only and should be verified.</small></p>
+{% include "_share_scan.html" %}
 <section class="card report-capture" id="email-report" aria-labelledby="email-report-title"><span class="eyebrow">Optional · Your score is already here</span><h2 id="email-report-title">Email me this report</h2>
 <p>Your report stays on this page. {% if aid %}It is already saved to your dashboard.{% else %}This guest report is not stored; signed-in scans are saved to your dashboard.{% endif %}</p>
 <p>Leave your email so SolvFix can follow up or send your report. This saves a request, not an automated email. No email is sent by this form.</p>

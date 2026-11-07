@@ -353,3 +353,50 @@ def test_local_woff2_fonts_with_fallbacks(client):
         assert client.get('/static/' + asset.decode()).status_code == 200
     page = client.get('/audit').data
     assert page.count(b'as="font" type="font/woff2" crossorigin') == 2
+
+
+def test_public_crawler_discovery(client):
+    from xml.etree import ElementTree
+    response = client.get('/sitemap.xml')
+    assert response.status_code == 200
+    assert response.mimetype == 'application/xml'
+    root = ElementTree.fromstring(response.data)
+    locations = [node.text for node in root.findall('{*}url/{*}loc')]
+    assert set(locations) == {'http://localhost' + path for path in (
+        '/', '/audit', '/services', '/gbp', '/reviews/request',
+        '/competitors', '/inquire', '/brand', '/signup')}
+    for private in ('/leads', '/dashboard', '/login', '/logout', '/audits/', '/reviews.csv'):
+        assert private.encode() not in response.data
+    robots = client.get('/robots.txt')
+    assert robots.status_code == 200
+    assert b'Allow: /' in robots.data
+    assert b'Sitemap: http://localhost/sitemap.xml' in robots.data
+
+
+def test_public_scan_sharing_and_schema(client):
+    import json, re, html
+    from urllib.parse import urlsplit, parse_qs
+    landing = client.get('/').data.decode()
+    report, _ = scan_context(client)
+    report = report.data.decode()
+    for page in (landing, report):
+        assert 'https://solvfix.onrender.com/audit' in page
+        assert 'Share the free scan' in page
+        assert 'scan their own business' in page
+        for forbidden in ('DESIGN PREVIEW', 'Local prototype', 'Not the live app'):
+            assert forbidden not in page
+        hrefs = [html.unescape(href) for href in re.findall(r'href="([^"]+)"', page)]
+        for prefix, key in (('https://twitter.com/intent/tweet?', 'url'),
+                            ('https://www.linkedin.com/sharing/share-offsite/?', 'url')):
+            link = next(href for href in hrefs if href.startswith(prefix))
+            assert parse_qs(urlsplit(link).query)[key] == ['https://solvfix.onrender.com/audit']
+        mail = next(href for href in hrefs if href.startswith('mailto:'))
+        assert 'https://solvfix.onrender.com/audit' in parse_qs(urlsplit(mail).query)['body'][0]
+    assert report.index('source-results-title') < report.index('Share the free scan')
+    assert report.index('40%') < report.index('Share the free scan')
+    assert '<meta name="twitter:card" content="summary">' in landing
+    schema = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', landing).group(1))
+    assert {item['@type'] for item in schema['@graph']} == {'Organization', 'SoftwareApplication'}
+    assert schema['@graph'][0]['url'] == 'https://solvfix.onrender.com'
+    assert schema['@graph'][1]['url'] == 'https://solvfix.onrender.com/audit'
+    assert 'sameAs' not in str(schema) and 'aggregateRating' not in str(schema)
