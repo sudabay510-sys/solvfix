@@ -1,60 +1,18 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>SolvFix Solutions | Your business, found and trusted</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Inter:wght@400;500&display=swap" rel=stylesheet>
-<style>
-:root{--navy:#0B1F3A;--teal:#14B8A6;--sky:#E6F7F5;--amber:#F59E0B;--ink:#1F2937;--mute:#6B7280}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,sans-serif;color:var(--ink)}
-h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;margin:0 0 .5em}
-.wrap{max-width:1100px;margin:auto;padding:0 24px}
-nav{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:18px 24px;max-width:1100px;margin:auto}
-.logo{font-family:'Plus Jakarta Sans';font-weight:800;font-size:22px;color:var(--navy)}.logo span{color:var(--teal)}
-nav a{margin-left:16px;line-height:2.4;color:var(--ink);text-decoration:none}
-.btn{display:inline-block;background:var(--teal);color:#fff!important;padding:14px 26px;border-radius:10px;font-weight:600;text-decoration:none}
-.btn.alt{background:transparent;border:2px solid #fff}
-.hero{background:linear-gradient(135deg,var(--navy),#123d63);color:#fff;padding:90px 0}
-.hero h1{font-size:clamp(34px,5vw,56px);line-height:1.1;max-width:760px}.hero p{font-size:20px;opacity:.9;max-width:640px}
-section{padding:72px 0}.alt-bg{background:var(--sky)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
-.card{background:#fff;border-radius:14px;padding:26px;box-shadow:0 4px 18px rgba(11,31,58,.08)}
-.card .ico{font-size:30px}.num{display:inline-block;width:38px;height:38px;border-radius:50%;background:var(--teal);color:#fff;text-align:center;line-height:38px;font-weight:700}
-.price{font-size:34px;font-weight:800;color:var(--navy)}.mute{color:var(--mute)}
-.cta{background:var(--navy);color:#fff;text-align:center}footer{padding:30px;text-align:center;color:var(--mute);font-size:14px}
-</style></head><body>
-<nav><div class=logo>Solv<span>Fix</span></div><div><a href="#what">What we do</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="/brand">Brand</a>{% if user %}<a href="/dashboard">Dashboard</a>{% else %}<a href="/login">Log in</a>{% endif %}<a class=btn href="/audit">Free audit</a></div></nav>
-<div class=hero><div class=wrap>
-<h1>Your business, found, accurate, and trusted everywhere online.</h1>
-<p>SolvFix checks where your business appears across directories, maps, and social sites, finds wrong or missing info, and helps you fix it. We've been helping small businesses since 2019.</p>
-<p><a class=btn href="/audit">Run my free listing audit</a> &nbsp; <a class="btn alt" href="#how">See how it works</a></p>
-</div></div>
-<section id=what><div class=wrap>
-<h2>What we do</h2><p class=mute>We help small and medium businesses take control of three things customers check before they call:</p>
-<div class=grid>
-<div class=card><div class=ico>🪪</div><h3>Digital identity</h3><p>The same name, address, and phone number on every listing, so customers and search engines can trust it.</p></div>
-<div class=card><div class=ico>⭐</div><h3>Reputation</h3><p>All your reviews in one inbox, with thoughtful reply drafts that you approve. We only work with real reviews.</p></div>
-<div class=card><div class=ico>🌐</div><h3>Footprint</h3><p>Find out where you're listed, where you're missing, and what's incomplete, then fill the gaps.</p></div>
-</div></div></section>
-<section class=alt-bg><div class=wrap>
-<h2>Four assistants working for your business</h2>
-<div class=grid>
-<div class=card><h3>1 · Audit Bot</h3><p>Checks your business across directories, maps, and social sites. Scores how well your name, address, and phone match, and flags where you're "Not listed."</p></div>
-<div class=card><h3>2 · Fix Bot</h3><p>Connects to supported platforms like Google and Facebook with your permission to correct details. On every other site, it gives you a step-by-step claim checklist.</p></div>
-<div class=card><h3>3 · Review Bot</h3><p>Brings reviews from connected platforms into one place and drafts replies. Nothing is posted until you approve it.</p></div>
-<div class=card><h3>4 · Social Bot</h3><p>Writes 30 social post drafts each month, tailored to your business. You edit and approve each one.</p></div>
-</div></div></section>
-<section id=how><div class=wrap>
-<h2>How it works</h2><div class=grid>
-<div><span class=num>1</span><h3>Enter your business</h3><p class=mute>Your name, address, and phone number. It takes about a minute.</p></div>
-<div><span class=num>2</span><h3>Get your free report</h3><p class=mute>See where you're listed, a match score for each listing, and what's missing.</p></div>
-<div><span class=num>3</span><h3>Fix and grow</h3><p class=mute>Choose a plan, connect your accounts, and work through the fixes with us.</p></div>
-</div></div></section>
-<section id=pricing class=alt-bg><div class=wrap>
-<h2>Simple pricing</h2><p class=mute>The plans below are planned. Pricing will be confirmed at launch.</p>
-<div class=grid>
-<div class=card><h3>Free Audit</h3><div class=price>$0</div><p>Listing check and match score.</p></div>
-<div class=card><h3>Starter</h3><div class=price>$49<small>/mo</small></div><p>Monthly audits, Google and Facebook connections, review inbox.</p></div>
-<div class=card><h3>Growth</h3><div class=price>$99<small>/mo</small></div><p>Everything in Starter, plus 30 social post drafts a month and weekly re-checks.</p></div>
-<div class=card><h3>Done-for-you</h3><div class=price>$199<small>/mo</small></div><p>Plus a $299 setup fee. Our team handles the manual claims and fixes.</p></div>
-</div></div></section>
-<section class=cta><div class=wrap><h2>See how your business shows up online</h2><p>The audit is free and takes about a minute. No credit card needed.</p><a class=btn href="/audit">Start my free audit</a></div></section>
-<footer>© SolvFix Solutions · We never create fake reviews or fake listings · Consistent listings support local search, but no one can guarantee rankings.</footer>
-</body></html>
+{% extends "base.html" %}
+{% block title %}Get your local business found with accurate listings and real reviews{% endblock %}
+{% block meta %}<meta name="description" content="Find missing listings and wrong business details. SolvFix helps local businesses improve NAP consistency, manage real reviews and plan social content. Start a free audit.">
+<meta property="og:title" content="SolvFix Solutions | Found. Accurate. Trusted."><meta property="og:description" content="Help customers find the right name, address, phone and reviews for your local business. Start with a free listing audit."><meta property="og:type" content="website"><meta property="og:url" content="{{url_for('landing', _external=True)}}">{% endblock %}
+{% block style %}.hero{background:linear-gradient(135deg,#0B1F3A,#123d63);color:white;padding:48px 28px;border-radius:20px;margin-bottom:30px}.hero h1{color:white;font-size:clamp(32px,5vw,54px);line-height:1.14;max-width:850px}.hero p{max-width:700px;font-size:18px}.hero .btn{background:var(--teal);color:var(--navy)!important}.hero .eyebrow{color:#90eee4}section{padding:28px 0}.popular{display:inline-block;background:var(--mist);color:#0b766d;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}.pricing .card{display:flex;flex-direction:column}.pricing .btn{margin-top:auto}.faq{max-width:850px}.subtle{font-size:14px}{% endblock %}
+{% block body %}
+<div class="hero"><p class="eyebrow">For local businesses · Since 2019</p><h1>Help nearby customers find the right business. Yours.</h1><p>The right name, address, phone, and real reviews make it easier to choose you. Find missing listings and inconsistent details, then turn a clear action plan into a stronger local presence.</p><div class="actions"><a class="btn" href="/audit">Get my free listing audit</a><a class="btn ghost" href="/services">Explore business services</a></div><p class="subtle">No credit card. No account required. Found. Accurate. Trusted.</p></div>
+<section><h2>Built for businesses people visit, call, and recommend</h2><p>Restaurants, shops, salons, clinics, contractors, and other local service businesses. Spend less time chasing inconsistent listings and more time serving your customers.</p><div class="grid"><div class="card"><h3>Be easier to find</h3><p>See where your business appears and where you may be missing.</p></div><div class="card"><h3>Make details dependable</h3><p>Keep your real-world name, address, and phone consistent so customers know how to reach you.</p></div><div class="card"><h3>Build trust honestly</h3><p>Organize genuine reviews, draft thoughtful replies, and keep your social content useful.</p></div></div></section>
+<section id="tools"><h2>Four practical tools. You stay in control.</h2><div class="grid"><div class="card"><h3>Audit Bot</h3><p>Check available directories and search snippets for your listing and NAP match score. Results are a starting point to verify, not a ranking report.</p><a href="/audit">Run a free audit →</a></div><div class="card"><h3>Fix Bot</h3><p>A guided claim/fix checklist with platform links. You make the changes; it does not connect to Google or Facebook or edit listings automatically. Prefer help? Request our done-for-you team.</p><a href="/services#citations">See citation help →</a></div><div class="card"><h3>Review Bot</h3><p>Import your existing reviews by paste or CSV, organize them, and draft replies. Nothing is fabricated or posted, even after approval. You publish replies yourself.</p><a href="/reviews">Open review inbox →</a></div><div class="card"><h3>Social Bot</h3><p>Generate 30 post drafts for a month. Edit the details, approve your content, and publish it yourself. Never auto-posts.</p><a href="/social">Create post drafts →</a></div></div></section>
+<section id="services"><h2>More help for your next stage of growth</h2><p>Start with free, usable tools—not just another report.</p><div class="grid"><div class="card"><h3>Google Business Profile checkup</h3><p>A personalized, prioritized owner checklist for categories, hours, photos and more.</p><a href="/gbp">Build my checklist →</a></div><div class="card"><h3>Review request kit</h3><p>Ready-to-copy SMS, email and in-person scripts for honest customer feedback.</p><a href="/reviews/request">Create my kit →</a></div><div class="card"><h3>Competitor gap check</h3><p>Compare two businesses and discover potential directory gaps worth verifying.</p><a href="/competitors">Compare businesses →</a></div></div><a href="/services">View all services, including local citation help →</a></section>
+<section id="pricing" class="pricing"><h2>A clear next step for every budget</h2><p>Start free, then request the support you need. Paid plans are arranged after a conversation; no charge or subscription starts here.</p><div class="grid">
+<div class="card"><h3>Free Audit</h3><div class="price">$0</div><p>Listing check, NAP match scores, and a report you can act on.</p><a class="btn ghost" href="/audit">Start free</a></div>
+<div class="card"><h3>Starter</h3><div class="price">$49<small>/mo</small></div><p>Monthly audits, imported-review inbox, and guided fix checklists.</p><a class="btn" href="/inquire?plan=starter">Request Starter</a></div>
+<div class="card feature"><p><span class="popular">Most popular</span></p><h3>Growth</h3><div class="price">$99<small>/mo</small></div><p>Starter + 30 social post drafts/month and weekly re-check support arranged with our team.</p><a class="btn" href="/inquire?plan=growth">Request Growth</a></div>
+<div class="card"><h3>Done-for-you</h3><div class="price">$199<small>/mo</small></div><p><strong>+ $299 setup</strong></p><p>Our team handles agreed manual claims and fixes with your authorization. Platform verification may still require you.</p><a class="btn" href="/inquire?plan=done-for-you">Get help with fixes</a></div></div><p class="mute subtle">Monthly and weekly work is coordinated with you after enrollment; the app does not silently schedule audits or make platform changes. Scope and service eligibility are confirmed before payment.</p></section>
+<section class="faq"><h2>Questions local owners ask</h2><details><summary>Can you fix my listings automatically?</summary><p>No. Fix Bot provides claim links and steps. You make the changes, or our done-for-you team can handle agreed manual work with your permission. Only genuine, eligible listings are created or claimed.</p></details><details><summary>Will you create reviews or post replies for me?</summary><p>Never fake reviews. We help request honest feedback from real customers and draft replies to imported reviews. You review and publish replies yourself. Do not buy reviews, offer incentives, or ask only customers likely to leave positive feedback.</p></details><details><summary>Will this guarantee Google or Maps rankings?</summary><p>No. Accurate listings support a useful local presence, but rankings depend on many factors. We do not guarantee positions, leads, or revenue.</p></details><details><summary>How long before I see results?</summary><p>Your audit report is available after the source checks finish; slow providers may take longer or be unavailable. Manual corrections can take days or weeks to verify and appear. Customer response varies, and business results are not guaranteed.</p></details><details><summary>Does “Not listed” prove my listing is missing?</summary><p>No. It may mean no matching search result was found. Snippets can be incomplete; verify on the platform before making changes or creating a listing.</p></details></section>
+<section class="notice"><h2>Know what customers can find today.</h2><p>Start with your free listing audit. Then choose DIY tools or ask us to help.</p><div class="actions"><a class="btn" href="/audit">Run my free audit</a><a class="btn ghost" href="/inquire">Talk about my business</a></div></section>
+{% endblock %}

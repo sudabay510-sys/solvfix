@@ -1,5 +1,8 @@
-"""SolvFix MVP web app (local only). Run: .venv/bin/python app.py -> http://127.0.0.1:5000"""
-import os, json, functools, datetime
+"""SolvFix local-business web app. Run: .venv/bin/python app.py -> http://127.0.0.1:5000"""
+import os, json, functools, datetime, re, secrets
+from urllib.parse import urlsplit
+from concurrent.futures import ThreadPoolExecutor, wait
+from zoneinfo import ZoneInfo
 from flask import Flask, render_template, request, redirect, url_for, session, flash, Response, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from audit import run_audit
@@ -8,6 +11,8 @@ import db, bots
 app = Flask(__name__)
 app.secret_key = os.environ.get("SOLVFIX_SECRET", os.urandom(24))
 app.teardown_appcontext(db.close)
+# Shared bounded pool: timed-out comparisons cannot spawn unlimited worker threads.
+comparison_pool = ThreadPoolExecutor(max_workers=4)
 
 def login_required(f):
     @functools.wraps(f)
@@ -16,8 +21,26 @@ def login_required(f):
         return f(*a, **k)
     return w
 
+def is_owner():
+    owner = os.getenv("SOLVFIX_OWNER_EMAIL", "").strip().casefold()
+    if not owner or not session.get("uid"): return False
+    u = db.q("SELECT email FROM users WHERE id=?", (session["uid"],), one=True)
+    return bool(u and u["email"].casefold() == owner)
+
+@app.template_filter("pacific")
+def pacific(value):
+    return datetime.datetime.fromisoformat(value).replace(tzinfo=datetime.timezone.utc).astimezone(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %I:%M %p %Z")
+
 @app.context_processor
-def ctx(): return dict(user=session.get("email"))
+def ctx():
+    if "form_token" not in session: session["form_token"] = secrets.token_urlsafe(32)
+    return dict(user=session.get("email"), owner_access=is_owner(), form_token=session["form_token"])
+
+
+def check_form_token():
+    token = request.form.get("form_token", "")
+    if not token or not secrets.compare_digest(token.encode(), session.get("form_token", "").encode()): abort(400)
+
 
 @app.route("/")
 def landing(): return render_template("landing.html")
@@ -168,6 +191,102 @@ def social_csv(bid):
     b = own_batch(bid)
     return Response(bots.to_csv(json.loads(b["posts_json"]), ["day", "pillar", "text", "hashtags", "status"]), mimetype="text/csv",
                     headers={"Content-Disposition": f"attachment; filename=solvfix_posts_{b['month']}.csv"})
+
+
+# ---------- local-business services and qualified leads ----------
+PLANS = {"free": "Free Audit · $0", "starter": "Starter · $49/mo", "growth": "Growth · $99/mo",
+         "done-for-you": "Done-for-you · $199/mo + $299 setup", "gbp": "Google Business Profile checkup",
+         "citations": "Local visibility / citation help", "reviews": "Review request kit", "competitors": "Competitor gap check"}
+
+@app.route("/services")
+def services(): return render_template("services.html")
+
+@app.route("/gbp", methods=["GET", "POST"])
+def gbp():
+    business = {k: request.form.get(k, "").strip()[:200] for k in ("name", "city")}
+    checklist = None
+    if request.method == "POST":
+        check_form_token()
+        if not all(business.values()): flash("Enter your business name and city.")
+        else: checklist = bots.gbp_checklist(business["name"], business["city"])
+    return render_template("gbp.html", business=business, checklist=checklist)
+
+@app.route("/request-reviews", methods=["GET", "POST"])
+@app.route("/reviews/request", methods=["GET", "POST"])
+def review_request():
+    name = request.form.get("name", "").strip()[:200]
+    link = request.form.get("review_link", "").strip()[:1000]
+    kit = None
+    if request.method == "POST":
+        check_form_token()
+        try:
+            u = urlsplit(link)
+            host = (u.hostname or "").lower()
+            valid_link = not link or (u.scheme == "https" and not u.username and not u.password and
+                (host in ("g.page", "maps.app.goo.gl", "search.google.com", "maps.google.com", "google.com", "www.google.com") or
+                 host.endswith(".google.com")))
+        except ValueError:
+            valid_link = False
+        if not name: flash("Enter your business name.")
+        elif not valid_link: flash("Paste your own HTTPS Google review link, or leave it blank. No other links are accepted.")
+        else: kit = bots.review_request_kit(name, link)
+    return render_template("review_request.html", name=name, review_link=link, kit=kit)
+
+@app.route("/competitors", methods=["GET", "POST"])
+def competitors():
+    fields = ("name", "address", "city", "phone")
+    businesses = [{k: request.form.get(prefix + k, "").strip()[:250] for k in fields} for prefix in ("your_", "their_")]
+    reports, gaps, error = None, [], None
+    if request.method == "POST":
+        check_form_token()
+        if any(not b["name"] or not (b["address"] or b["city"]) for b in businesses):
+            error = "Enter a name and an address or city for both businesses."
+        else:
+            # Bound the web request even when an upstream search provider is slow.
+            # Running work retains its provider-level timeouts; queued work can be cancelled.
+            jobs = [comparison_pool.submit(run_audit, dict(b, address=b["address"] or b["city"]),
+                                use_search=not request.form.get("nosearch")) for b in businesses]
+            _, pending = wait(jobs, timeout=20)
+            try:
+                if pending: error = "The comparison timed out. Try again with directory search disabled; unavailable sources are not counted as missing."
+                else:
+                    reports = [job.result() for job in jobs]
+                    yours = {x["source"]: x for x in reports[0]["results"]}
+                    gaps = [x["source"] for x in reports[1]["results"] if x["status"].startswith("Listed") and
+                            yours.get(x["source"], {}).get("status") == "Not listed"]
+            except Exception:
+                error = "A data provider is unavailable. Please retry later or disable directory search."
+            finally:
+                for job in pending: job.cancel()
+    return render_template("competitors.html", businesses=businesses, reports=reports, gaps=gaps, error=error)
+
+@app.route("/contact", methods=["GET", "POST"])
+@app.route("/inquire", methods=["GET", "POST"])
+def inquire():
+    values = {k: request.form.get(k, "").strip() for k in ("name", "email", "phone", "business", "city", "plan", "message")}
+    if request.method == "GET": values["plan"] = request.args.get("plan", "")
+    if request.method == "POST":
+        check_form_token()
+        if (not all(values[k] for k in ("name", "email", "business", "city")) or
+            not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", values["email"]) or values["plan"] not in PLANS):
+            flash("Enter your name, valid email, business, city, and a service or plan.")
+        elif any(len(values[k]) > (4000 if k == "message" else 254) for k in values):
+            flash("Please shorten your entries (254 characters per field; 4,000 for the message).")
+        else:
+            db.x("INSERT INTO inquiries(user_id,name,email,phone,business,city,plan,message) VALUES(?,?,?,?,?,?,?,?)",
+                 (session.get("uid"), values["name"], values["email"].lower(), values["phone"], values["business"], values["city"], values["plan"], values["message"]))
+            return redirect(url_for("inquiry_thanks"))
+    return render_template("inquire.html", values=values, plans=PLANS)
+
+@app.route("/inquire/thanks")
+def inquiry_thanks(): return render_template("inquiry_thanks.html")
+
+@app.route("/leads")
+@login_required
+def leads():
+    if not is_owner(): abort(403)
+    rows = db.q("SELECT * FROM inquiries ORDER BY id DESC")
+    return render_template("leads.html", rows=rows, plans=PLANS)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)

@@ -2,6 +2,10 @@
 import os, json, sqlite3
 from flask import g
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS inquiries(id INTEGER PRIMARY KEY, user_id INTEGER, name TEXT NOT NULL,
+  email TEXT NOT NULL, phone TEXT, business TEXT NOT NULL, city TEXT NOT NULL, plan TEXT NOT NULL,
+  message TEXT, created TEXT DEFAULT CURRENT_TIMESTAMP);
+
 CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, email TEXT UNIQUE NOT NULL, pw_hash TEXT NOT NULL, created TEXT DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE IF NOT EXISTS audits(id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, name TEXT, address TEXT, phone TEXT, city TEXT,
   score INTEGER, results_json TEXT, created TEXT DEFAULT CURRENT_TIMESTAMP);

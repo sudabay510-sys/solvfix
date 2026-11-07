@@ -139,3 +139,27 @@ def fix_checklist(results, biz):
     for s in ALWAYS:
         items.append(dict(site=s, issue="Not checked by audit yet", claim_url=CLAIM[s], steps=f"Search for your business on {s} and claim or create it with the exact same NAP."))
     return items
+
+
+# ---------------- Local-business service tools (no APIs) ----------------
+def gbp_checklist(name, city):
+    """Owner-guided checklist, not a live inspection of a Google profile."""
+    return [
+        dict(priority="1 · Foundation", title="Accurate name, address and phone", text=f"For {name} in {city}, use your real-world business name, correct phone and eligible address or service area. Match these across your website and directories; do not add keywords to your name."),
+        dict(priority="1 · Foundation", title="Claim and verify", text="Find your existing profile before creating anything. Claim it and complete Google's verification yourself; avoid duplicate or fake listings."),
+        dict(priority="1 · Foundation", title="Categories", text=f"Choose the most specific primary category describing what {name} actually does, then only relevant secondary categories."),
+        dict(priority="1 · Foundation", title="Hours", text=f"Confirm regular hours, holiday hours and appointment details for customers in {city}."),
+        dict(priority="2 · Complete", title="Products and services", text="Add your real services or products with clear descriptions, current prices where appropriate, and a working website or booking link."),
+        dict(priority="2 · Complete", title="Photos", text="Upload current, authentic exterior, interior, team and work photos you have permission to use. Avoid misleading stock images."),
+        dict(priority="2 · Complete", title="Questions and answers", text="Check public questions and answer factual customer queries. Never impersonate a customer or invent endorsements."),
+        dict(priority="3 · Maintain", title="Posts", text=f"Draft a useful update for {name}: a real offer, service tip or local announcement. Check dates and publish manually if the feature is available."),
+        dict(priority="3 · Maintain", title="Review replies", text="Reply thoughtfully to genuine positive and negative reviews without disclosing customer information. Ask real customers neutrally for honest feedback; never buy reviews or offer incentives."),
+    ]
+
+def review_request_kit(name, link=""):
+    destination = link or "[paste your own Google review link here]"
+    return [
+        dict(label="SMS", text=f"Thanks for choosing {name}! If you'd like, please share an honest review of your experience: {destination} . All feedback is welcome. No pressure, and thank you!"),
+        dict(label="Email", text=f"Subject: How was your experience with {name}?\n\nThank you for visiting {name}. Your honest feedback helps us improve and helps others make informed choices. If you have a moment, please leave a review: {destination}\n\nWe welcome all feedback, positive or negative. Reviewing is optional. Thank you for supporting our local business!"),
+        dict(label="In-person", text=f"Thank you for choosing {name}. If you would like to share your experience, our review link is available here. We welcome an honest review, whatever your experience. There is no obligation."),
+    ]

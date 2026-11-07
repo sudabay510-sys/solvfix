@@ -1,7 +1,7 @@
 """SolvFix Bot 1 (Audit) - MVP. Checks only sources usable without scraping site pages:
 OpenStreetMap Nominatim (free, 1 req/s policy), web-search snippets (ddgs), and optional
 Google Places / Yelp Fusion when API keys are set in env."""
-import os, re, time, difflib, requests
+import os, re, time, difflib, requests, threading
 UA = {"User-Agent": "SolvFix-MVP/0.1 (local prototype)"}
 
 # site-search directories: we only read the search engine's result title/snippet, never the site itself
@@ -35,16 +35,26 @@ def score(biz, name=None, addr=None, phone=None, text=None):
     pct = round(0.4 * det["name"] + 0.35 * det["address"] + 0.25 * det["phone"])
     return pct, det, missing
 
+# Concurrent comparisons share Nominatim's one-request-per-second limit.
+_osm_lock = threading.Lock()
+_osm_last_request = 0.0
+
+def _osm_get(params):
+    global _osm_last_request
+    with _osm_lock:
+        delay = 1.05 - (time.monotonic() - _osm_last_request)
+        if delay > 0: time.sleep(delay)
+        _osm_last_request = time.monotonic()
+        return requests.get("https://nominatim.openstreetmap.org/search", headers=UA, timeout=5, params=params)
+
 def osm(biz):
     q = f'{biz["name"]}, {biz["address"]}'
     try:
-        r = requests.get("https://nominatim.openstreetmap.org/search", headers=UA, timeout=15,
-            params={"q": q, "format": "jsonv2", "extratags": 1, "addressdetails": 1, "limit": 3})
+        r = _osm_get({"q": q, "format": "jsonv2", "extratags": 1, "addressdetails": 1, "limit": 3})
         res = r.json()
         if not res:  # fallback: name only near city
             time.sleep(1)
-            r = requests.get("https://nominatim.openstreetmap.org/search", headers=UA, timeout=15,
-                params={"q": biz["name"], "format": "jsonv2", "extratags": 1, "limit": 3})
+            r = _osm_get({"q": biz["name"], "format": "jsonv2", "extratags": 1, "limit": 3})
             res = r.json()
     except Exception as e:
         return dict(source="OpenStreetMap", status="Error", note=str(e))
@@ -67,10 +77,14 @@ def web_search(biz):
     out = []
     try:
         from ddgs import DDGS
-        d = DDGS()
+        d = DDGS(timeout=4)
+        deadline = time.monotonic() + 12
     except Exception as e:
         return [dict(source=s, status="Error", note=str(e)) for s, _ in SEARCH_SITES]
     for label, dom in SEARCH_SITES:
+        if time.monotonic() >= deadline:
+            out.append(dict(source=label, status="Skipped", note="Search time budget reached; retry later."))
+            continue
         try:
             hits = d.text(f'"{biz["name"]}" {biz["city"]} site:{dom}', max_results=3) or []
         except Exception as e:
@@ -119,7 +133,11 @@ def yelp(biz):
 
 def run_audit(biz, use_search=True):
     biz["city"] = biz.get("city") or (biz["address"].split(",")[-2].strip() if biz["address"].count(",") >= 2 else "")
-    results = [google_places(biz), yelp(biz), osm(biz)]
+    results = []
+    for label, check in (("Google Business Profile", google_places), ("Yelp (Fusion API)", yelp), ("OpenStreetMap", osm)):
+        try: results.append(check(biz))
+        except Exception:
+            results.append(dict(source=label, status="Error", note="Provider unavailable; retry later."))
     if use_search: results += web_search(biz)
     scored = [r for r in results if "score" in r]
     checked = [r for r in results if r["status"] not in ("Skipped", "Error")]

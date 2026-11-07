@@ -1,4 +1,4 @@
-# SolvFix MVP web app (Bots 1-4) — local only, not deployed
+# SolvFix Solutions — local business visibility tools
 
 ## Run
     cd /workspace/solvfix/mvp
@@ -27,7 +27,22 @@ Pages: `/` landing, `/brand`, `/signup`, `/login`, `/logout`, `/audit`, `/dashbo
 - **Optional LLM**: set `SOLVFIX_LLM_API_KEY` (and optionally `SOLVFIX_LLM_URL`, any OpenAI-compatible chat-completions endpoint, and `SOLVFIX_LLM_MODEL`, default gpt-4o-mini). If unset or the call fails, templates are used.
 
 ## Not done yet
-Real platform connections (Google Business Profile / Facebook APIs) for automatic fixes and review import, password reset, email verification, CSRF protection, billing, and deployment.
+Real platform connections (Google Business Profile / Facebook APIs) for automatic fixes and review import, password reset, email verification, full-app CSRF protection (new service forms are protected), billing, and automated recurring work.
 
 ## Files
 audit.py (Bot 1), bots.py (Bots 2-4 + LLM hook), db.py (SQLite), app.py (Flask routes), templates/ (base, landing, brand, auth, form, report, dashboard, fix, reviews, social), test_app.py, test_audit.py (live network), sample_report.html (output from the test run).
+
+
+## Local-business growth services
+- `/services`: tool directory and local citation guidance using the saved audit Fix Bot checklist.
+- `/gbp` (GET/POST): personalized, prioritized Google Business Profile self-assessment; no live Google access.
+- `/reviews/request` or `/request-reviews` (GET/POST): copy-ready SMS/email/in-person review requests; only real customers, no review gating or incentives. Optional owner-supplied HTTPS Google review link; no messages are sent and QR creation is explained, not outsourced.
+- `/competitors` (GET/POST): two audits with optional directory search, score/coverage comparison, and potential gaps. Only explicitly Not listed sources count as gaps; unavailable sources do not. Runs are concurrent with a 20-second response deadline. Comparisons are not saved; run an individual audit while logged in to retain history.
+- `/inquire` or `/contact` (GET/POST): validated contact and plan/service requests saved in the new `inquiries` SQLite table; `/inquire/thanks` confirms storage. No email is sent automatically.
+- `/leads`: owner-only inquiries, newest first, with Pacific timestamps. Set `SOLVFIX_OWNER_EMAIL` to the owner's existing account email (case-insensitive). Unset means no access; guests redirect to login and non-owners receive 403. Protect and verify that owner account before enabling this view; the app does not yet verify signup emails.
+
+Pricing: Free Audit $0; Starter $49/mo; Growth $99/mo; Done-for-you $199/mo + $299 setup. Paid CTAs preselect the requested plan on the inquiry form. Requests are not purchases; there is no Stripe checkout, billing, automatic subscription, or scheduled audit worker. Monthly audits / weekly re-check support and manual claims/fixes must be arranged and fulfilled by the team. No profitability, leads, or ranking guarantees.
+
+Storage initializes additive tables automatically. **Production:** back up SQLite and use persistent storage (`SOLVFIX_DB` on an attached disk) before accepting real inquiries; Render's default filesystem is ephemeral. Keep `SOLVFIX_SECRET` stable. Never commit `.env`, database files, logs, `.venv`, or real/demo credentials.
+
+Offline verification: `.venv/bin/python -m pytest -q test_app.py`. `test_audit.py` is an opt-in live-network smoke script; its main guard prevents network calls and generated report changes during pytest collection.
