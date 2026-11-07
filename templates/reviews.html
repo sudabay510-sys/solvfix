@@ -1,14 +1,14 @@
-{% extends "base.html" %}{% block title %}Review inbox{% endblock %}{% block body %}
-<h1>Review inbox</h1><p class=mute>Bot 3 v1 · Paste or import your real reviews. SolvFix never writes reviews and never posts replies; copy an approved reply to the platform yourself.</p>
+{% extends "base.html" %}{% block title %}Review inbox{% endblock %}{% block body %}<span class="eyebrow">Real reviews. Thoughtful replies.</span>
+<h1>Review inbox</h1><p class=mute>Paste or import your real reviews. SolvFix never writes reviews and never posts replies; copy an approved reply to the platform yourself.</p>
 <div class=card><h3>Import reviews</h3><form method=post enctype=multipart/form-data><input type=hidden name=action value=import>
-<div class=grid><div><label>Platform</label><input name=platform placeholder="Google, Yelp, Facebook…"></div><div><label>CSV file (columns: platform, author, rating, text)</label><input type=file name=csv accept=".csv,text/csv"></div></div>
-<label>Or paste reviews (blank line between reviews; optional first line like "Maria G - 5")</label><textarea name=text rows=5></textarea>
-<label>Business name for replies (optional)</label><input name=business><button>Import</button></form></div>
-{% if rows %}<p><form method=post style="display:inline"><input type=hidden name=action value=draft_all><button class="small ghost">Draft replies for all without one</button></form> <a class="btn small ghost" href="/reviews.csv">Download CSV</a></p>{% endif %}
+<div class=grid><div><label for="field-platform">Platform</label><input id="field-platform" name=platform placeholder="Google, Yelp, Facebook…"></div><div><label for="field-csv">CSV file (columns: platform, author, rating, text)</label><input id="field-csv" type=file name=csv accept=".csv,text/csv"></div></div>
+<label for="field-text">Or paste reviews (blank line between reviews; optional first line like "Maria G - 5")</label><textarea id="field-text" name=text rows=5></textarea>
+<label for="field-business">Business name for replies (optional)</label><input id="field-business" name=business><button>Import</button></form></div>
+{% if rows %}<p><form method=post style="display:inline"><input type=hidden name=action value=draft_all><button class="small ghost">Draft replies for all without one</button></form> <a class="btn small ghost" href="{{url_for('reviews_csv')}}">Download CSV</a></p>{% endif %}
 {% for r in rows %}<div class=card><h3>{{r.author or 'Anonymous'}} {% if r.rating %}· {{'★'*r.rating}}{% endif %} <span class="pill {{'ok' if r.status=='approved' else 'dr'}}">{{r.status}}</span></h3>
 <p class=mute>{{r.platform}}</p><p>{{r.text}}</p>
-<form method=post><input type=hidden name=id value="{{r.id}}"><label>Reply</label><textarea name=reply rows=3>{{r.reply}}</textarea>
+<form method=post><input type=hidden name=id value="{{r.id}}"><label for="reply-{{r.id}}">Reply</label><textarea id="reply-{{r.id}}" name=reply rows=3>{{r.reply}}</textarea>
 <button name=action value=draft class="small ghost">Generate draft</button> <button name=action value=save class="small ghost">Save</button>
 {% if r.status=='approved' %}<button name=action value=unapprove class="small warn">Back to draft</button>{% else %}<button name=action value=approve class=small>Approve</button>{% endif %}
-<button name=action value=delete class="small ghost">Delete</button> <button type=button class="small ghost" onclick="navigator.clipboard.writeText(this.form.reply.value)">Copy</button></form></div>
+<button name=action value=delete class="small ghost">Delete</button> <button type=button class="small ghost" data-copy-target="reply-{{r.id}}">Copy</button><span class="copy-status" role="status"></span></form></div>
 {% else %}<p class=mute>No reviews yet.</p>{% endfor %}{% endblock %}

@@ -1,32 +1,20 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
 <title>{% block title %}SolvFix{% endblock %} | SolvFix Solutions</title>
 {% block meta %}<meta name="description" content="Practical listing audits, reputation tools and local visibility help for small businesses.">{% endblock %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel=stylesheet>
-<style>
-:root{--navy:#0B1F3A;--teal:#14B8A6;--mist:#E6F7F5;--amber:#F59E0B;--ink:#1F2937;--mute:#6B7280;--red:#DC2626}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,sans-serif;color:var(--ink);background:#F8FAFB}
-h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif;color:var(--navy);margin:0 0 .5em}
-a{color:#0f8f82}.wrap{max-width:1100px;margin:auto;padding:24px}
-header{background:#fff;border-bottom:1px solid #e5e7eb}
-nav{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;align-items:center;max-width:1100px;margin:auto;padding:14px 24px}
-nav .links{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}nav .links a{color:var(--ink);text-decoration:none;font-weight:500}
-.logo{font-family:'Plus Jakarta Sans';font-weight:800;font-size:22px;color:var(--navy);text-decoration:none}.logo span{color:var(--teal)}
-.btn,button{display:inline-block;background:var(--navy);color:#fff!important;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:0;cursor:pointer;font:inherit;font-weight:600}
-.btn.ghost,button.ghost{background:#fff;color:var(--navy)!important;border:1px solid #cbd5e1}button.warn{background:var(--amber)}button.small,.btn.small{padding:6px 12px;font-size:14px}
-.card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 4px 18px rgba(11,31,58,.07);margin-bottom:18px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin:4px 0 14px}
-label{font-weight:500;font-size:14px}.mute{color:var(--mute)}.flash{background:var(--mist);border-left:4px solid var(--teal);padding:10px 14px;border-radius:6px;margin-bottom:14px}
-.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;background:#fff}td,th{border-bottom:1px solid #e5e7eb;padding:9px;font-size:14px;text-align:left;vertical-align:top}th{background:var(--mist);color:var(--navy)}
-.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600}.ok{background:#d1fae5;color:#065f46}.nl{background:#fee2e2;color:#991b1b}.sk{background:#f3f4f6;color:#6b7280}.dr{background:#fef3c7;color:#92400e}
-.big{font-family:'Plus Jakarta Sans';font-size:44px;font-weight:800;color:var(--navy)}
-footer{padding:26px;text-align:center;color:var(--mute);font-size:13px}
-@media(max-width:600px){.wrap{padding:14px}.big{font-size:34px}td,th{font-size:13px;padding:6px}}
-.eyebrow{text-transform:uppercase;letter-spacing:.1em;font-size:13px;font-weight:700;color:#0b766d}.feature{border:2px solid var(--teal)}.notice{background:var(--mist);padding:18px;border-radius:10px;margin-bottom:18px}p,li{line-height:1.65}textarea{min-height:130px}details{padding:16px 0;border-bottom:1px solid #dbe4e9}summary{cursor:pointer;font-weight:600}a:focus-visible,button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}.card,.grid>*{min-width:0}td{overflow-wrap:anywhere}.price{font-size:32px;font-weight:800;color:var(--navy)}.price small{font-size:16px}.copy-status{font-size:13px;color:#0b766d} .actions{display:flex;flex-wrap:wrap;gap:12px}
-{% block style %}{% endblock %}</style></head><body>
-<header><nav><a class=logo href="/">Solv<span>Fix</span></a><div class=links>
-<a href="/services">Services</a><a href="/#pricing">Pricing</a><a href="/inquire">Contact</a><a href="/audit">Free audit</a>{% if owner_access %}<a href="/leads">Leads</a>{% endif %}{% if user %}<a href="/dashboard">Dashboard</a><a href="/reviews">Reviews</a><a href="/social">Social</a><a href="/logout">Log out</a>
-{% else %}<a href="/login">Log in</a><a class="btn small" href="/signup">Sign up</a>{% endif %}</div></nav></header>
-<main class=wrap>{% for m in get_flashed_messages() %}<div class=flash>{{m}}</div>{% endfor %}{% block body %}{% endblock %}</main>
-<footer>© SolvFix Solutions · Found. Accurate. Trusted. · Since 2019 · We never create fake reviews or fake listings, nothing is posted automatically, and rankings are never guaranteed.</footer>
+<link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='product.css')}}">
+<script defer src="{{url_for('static', filename='product.js')}}"></script>
+<style>{% block style %}{% endblock %}</style></head><body>
+{% macro logo() %}<a class="logo" href="{{url_for('landing')}}" aria-label="SolvFix Solutions home"><svg viewBox="0 0 30 38" aria-hidden="true"><path fill="#14b8a6" d="M15 1C7 1 1 7 1 15c0 10 14 22 14 22s14-12 14-22C29 7 23 1 15 1Z"/><path d="m9 15 4 4 8-9" fill="none" stroke="#0b1f3a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Solv<span>Fix</span></span></a>{% endmacro %}
+<a class="skip" href="#main">Skip to content</a>
+<header><div class="wrap nav">{{logo()}}<nav class="navlinks" id="main-nav" aria-label="Main navigation">
+<a href="{{url_for('services')}}" {% if request.endpoint=='services' %}aria-current="page"{% endif %}>Services</a><a href="{{url_for('landing')}}#pricing">Pricing</a><a href="{{url_for('inquire')}}">Contact</a>
+{% if user %}<a href="{{url_for('dashboard')}}">Dashboard</a><a href="{{url_for('logout')}}">Log out</a>{% else %}<a href="{{url_for('login')}}">Log in</a><a href="{{url_for('signup')}}">Sign up</a>{% endif %}
+{% if owner_access %}<a href="{{url_for('leads')}}">Leads</a>{% endif %}
+</nav><div class="nav-actions"><a class="btn" href="{{url_for('index')}}">Free scan</a><button type="button" class="menu-btn" aria-controls="main-nav" aria-expanded="false" aria-label="Open navigation">☰</button></div></div></header>
+<main id="main" class="{% block main_class %}wrap product-main{% endblock %}">{% for m in get_flashed_messages() %}<div class="flash" role="status">{{m}}</div>{% endfor %}{% block body %}{% endblock %}</main>
+<section class="cta-band"><div class="wrap"><div><span class="eyebrow">Your next clear step</span><h2>Know what customers<br>can find today.</h2></div><a class="btn" href="{{url_for('index')}}">Run my free Business Exposure Scan</a></div></section>
+<footer><div class="wrap"><div class="footer-top"><div>{{logo()}}<p class="micro">Found. Accurate. Trusted.<br>Small business. Solid footprint.</p></div><nav class="footer-links" aria-label="Explore"><a href="{{url_for('services')}}">Services</a><a href="{{url_for('gbp')}}">GBP checkup</a><a href="{{url_for('review_request')}}">Review request kit</a><a href="{{url_for('competitors')}}">Competitor gap check</a><a href="{{url_for('dashboard')}}">Dashboard</a><a href="{{url_for('inquire')}}">Contact</a></nav></div><div class="footer-promise"><p>We never create fake reviews or fake listings. Nothing is posted automatically. Consistent listings support local search, but no one can guarantee rankings, leads or revenue.</p><p>© 2026 SolvFix Solutions</p></div></div></footer>
+<div class="mobile-cta"><a class="btn" href="{{url_for('index')}}">Run my free Business Exposure Scan</a></div>
 </body></html>

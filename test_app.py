@@ -201,3 +201,107 @@ def test_audit_provider_failure_is_unavailable_not_missing(monkeypatch):
 def test_new_forms_reject_missing_csrf(client):
     for path in ("/gbp", "/reviews/request", "/competitors", "/contact"):
         assert client.post(path, data={}).status_code == 400
+
+# Business Exposure Scan: the actual report is public before optional email capture.
+def scan_context(client):
+    import re, html
+    response = client.post('/audit', data=dict(name='Current Salon', address='10 Main St', city='Oakland', phone='5105550100'))
+    assert response.status_code == 200
+    page = response.data.decode()
+    with client.session_transaction() as sess: csrf = sess['form_token']
+    context = html.unescape(re.search(r'name="report_context" value="([^"]+)"', page).group(1))
+    return response, dict(form_token=csrf, report_context=context)
+
+
+def test_scan_score_is_real_and_not_email_gated(client):
+    response, _ = scan_context(client)
+    assert b'40%' in response.data and b'Current Salon' in response.data
+    assert b'Business Exposure Scan' in response.data
+    assert response.data.index(b'40%') < response.data.index(b'Email me this report')
+    assert b'72%' not in response.data and b'Example Bakery' not in response.data
+    with appmod.app.app_context():
+        assert appmod.db.q('SELECT COUNT(*) n FROM inquiries', one=True)['n'] == 0
+        assert appmod.db.q('SELECT COUNT(*) n FROM audits', one=True)['n'] == 0
+
+
+@pytest.mark.parametrize('csrf', ['', 'incorrect'])
+def test_scan_capture_csrf_required(client, csrf):
+    _, data = scan_context(client)
+    data.update(email='guest@example.com', form_token=csrf)
+    assert client.post('/audit/email-report', data=data).status_code == 400
+    with appmod.app.app_context(): assert appmod.db.q('SELECT COUNT(*) n FROM inquiries', one=True)['n'] == 0
+
+
+@pytest.mark.parametrize('email', ['', 'not-an-email', 'bad@address', 'a b@example.com', 'x'*250+'@example.com'])
+def test_scan_capture_email_validation_keeps_report(client, email):
+    _, data = scan_context(client)
+    response = client.post('/audit/email-report', data={**data, 'email': email})
+    assert response.status_code == 400
+    assert b'Enter a valid email' in response.data and b'Current Salon' in response.data and b'40%' in response.data
+    with appmod.app.app_context(): assert appmod.db.q('SELECT COUNT(*) n FROM inquiries', one=True)['n'] == 0
+
+
+def test_guest_scan_capture_stores_inquiry_not_audit(client):
+    _, data = scan_context(client)
+    response = client.post('/audit/email-report', data={**data, 'email': 'Guest@Example.com', 'name': 'Forged business'})
+    assert response.status_code == 200
+    for text in (b'Your email is saved.', b'No email has been sent.', b'Your report stays on this page.', b'40%', b'Current Salon'):
+        assert text in response.data
+    with appmod.app.app_context():
+        row = appmod.db.q('SELECT * FROM inquiries', one=True)
+        assert row['plan'] == 'free-scan' and row['email'] == 'guest@example.com' and row['user_id'] is None
+        assert row['business'] == row['name'] == 'Current Salon' and row['city'] == 'Oakland' and row['phone'] == '5105550100'
+        assert '10 Main St' in row['message'] and 'guest (report not stored)' in row['message']
+        assert appmod.db.q('SELECT COUNT(*) n FROM audits', one=True)['n'] == 0
+
+
+def test_saved_scan_capture_references_owned_audit(client):
+    client.post('/signup', data=dict(email='scan@example.com', password='test-password'))
+    _, data = scan_context(client)
+    response = client.post('/audit/email-report', data={**data, 'email': 'scan@example.com'})
+    assert b'It is already saved to your dashboard.' in response.data
+    with appmod.app.app_context():
+        row = appmod.db.q('SELECT * FROM inquiries', one=True)
+        audit = appmod.db.q('SELECT * FROM audits', one=True)
+        assert row['user_id'] == audit['user_id'] and f"Audit id: {audit['id']}" in row['message']
+    saved = client.get('/audits/1')
+    assert saved.status_code == 200 and b'Email me this report' in saved.data
+
+
+def test_scan_capture_rejects_modified_or_expired_context(client, monkeypatch):
+    _, data = scan_context(client)
+    assert client.post('/audit/email-report', data={**data, 'email': 'a@example.com', 'report_context': data['report_context']+'x'}).status_code == 400
+    import itsdangerous.timed
+    original_time = itsdangerous.timed.time.time
+    with monkeypatch.context() as patch:
+        patch.setattr(itsdangerous.timed.time, 'time', lambda: original_time()+86401)
+        assert client.post('/audit/email-report', data={**data, 'email': 'a@example.com'}).status_code == 400
+    with appmod.app.app_context(): assert appmod.db.q('SELECT COUNT(*) n FROM inquiries', one=True)['n'] == 0
+
+
+def test_scan_capture_context_cannot_cross_accounts(client):
+    client.post('/signup', data=dict(email='scan-a@example.com', password='test-password'))
+    _, data = scan_context(client)
+    client.get('/logout')
+    client.post('/signup', data=dict(email='scan-b@example.com', password='test-password'))
+    client.get('/audit')
+    with client.session_transaction() as sess: data['form_token'] = sess['form_token']
+    assert client.post('/audit/email-report', data={**data, 'email': 'b@example.com'}).status_code == 400
+
+
+def test_production_design_assets_and_links(client):
+    for path in ('/', '/audit', '/services', '/gbp', '/reviews/request', '/competitors', '/inquire', '/login', '/signup', '/brand'):
+        response = client.get(path)
+        assert response.status_code == 200
+        for forbidden in (b'DESIGN PREVIEW', b'Local prototype', b'Not the live app', b'href="audit.html', b'app.js'):
+            assert forbidden not in response.data
+        assert b'/static/product.js' in response.data and b'/static/styles.css' in response.data
+    home = client.get('/').data
+    assert b'Illustration' in home and b'not live fixes' in home
+    css = client.get('/static/styles.css')
+    assert css.status_code == 200 and css.data.startswith(b"@import url('fonts.css');\n")
+    fonts = client.get('/static/fonts.css')
+    assert fonts.status_code == 200
+    import re
+    for asset in re.findall(rb'url\(([^)]+)\)', fonts.data):
+        assert client.get('/static/'+asset.decode()).status_code == 200

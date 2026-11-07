@@ -1,8 +1,13 @@
-{% extends "base.html" %}{% block title %}Free audit{% endblock %}{% block body %}
-<div class=card style="max-width:620px;margin:auto"><h1>Free business listing audit</h1>
-<p class=mute>{% if user %}Your results will be saved to your dashboard with a fix checklist.{% else %}<a href="/signup">Sign up</a> to save results and get a fix checklist.{% endif %}</p>
-<form method=post action="/audit"><label>Business name</label><input name=name required>
-<label>Street address (e.g. 123 Main St, San Francisco, CA 94103)</label><input name=address required>
-<label>City (optional, helps search)</label><input name=city><label>Phone</label><input name=phone required>
-<label><input type=checkbox name=nosearch style="width:auto;margin:0 6px 0 0"> Skip web-search sources (faster)</label><br><br>
-<button>Run audit</button></form></div>{% endblock %}
+{% extends "base.html" %}{% block title %}Free Business Exposure Scan{% endblock %}{% block body %}
+<div class="page-intro"><span class="eyebrow">A clearer picture starts here · Free</span><h1>How consistent is your<br>business online?</h1><p>Run your free Business Exposure Scan. Check your name, address and phone across available sources, see your NAP match score, and find details worth verifying.</p><p class="micro">No credit card. No account required. Your score appears before any optional email request.</p></div>
+<div class="split workbench"><div class="panel"><div class="panel-head"><h2>Find my business details</h2><span class="chip">Free · $0</span></div>
+<form method="post" action="{{url_for('index')}}"><div class="form-grid">
+<label class="field full">Business name<input name="name" required maxlength="250" autocomplete="organization" placeholder="Your real-world business name"></label>
+<label class="field full">Street address<input name="address" required maxlength="500" autocomplete="street-address" placeholder="123 Main St, San Francisco, CA 94103"></label>
+<label class="field">City (optional, helps search)<input name="city" maxlength="250" autocomplete="address-level2"></label><label class="field">Phone<input name="phone" type="tel" required maxlength="100" autocomplete="tel"></label></div>
+<label class="inline-check"><input type="checkbox" name="nosearch" value="1">Skip web-search sources (faster, fewer sources)</label>
+<button type="submit" class="btn">Run my free Business Exposure Scan</button>
+<p class="micro">Checks may take a moment. Unavailable sources are excluded, not treated as missing.</p></form></div>
+<aside class="panel report"><span class="eyebrow">Clarity, not guesswork</span><h2>Know what to verify next.</h2><ol class="steps"><li>Enter the correct name, address and phone customers should find.</li><li>See real source checks and an exposure score based on NAP match.</li><li>Review findings, then work through your guided next steps.</li></ol><div class="callout">The score is not a search ranking or a prediction of leads or revenue. “Not listed” means no matching result was found; verify before making changes.</div>
+{% if user %}<p class="small">Your results will be saved to your dashboard with a fix checklist.</p>{% else %}<p class="small"><a href="{{url_for('signup')}}">Create a free account</a> before scanning to save results and get a fix checklist. Guest scans work without an account.</p>{% endif %}</aside></div>
+{% endblock %}

@@ -4,6 +4,7 @@ from urllib.parse import urlsplit
 from concurrent.futures import ThreadPoolExecutor, wait
 from zoneinfo import ZoneInfo
 from flask import Flask, render_template, request, redirect, url_for, session, flash, Response, abort
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
 from audit import run_audit
 import db, bots
@@ -87,8 +88,50 @@ def index():
                        (session["uid"], biz["name"], biz["address"], biz["phone"], biz.get("city", ""), r["overall"], json.dumps(r["results"])))
             for it in bots.fix_checklist(r["results"], biz):
                 db.x("INSERT INTO fix_items(audit_id,site,issue,steps,claim_url) VALUES(?,?,?,?,?)", (aid, it["site"], it["issue"], it["steps"], it["claim_url"]))
-        return render_template("report.html", r=r, aid=aid)
+        return render_report(r, aid)
     return render_template("form.html")
+
+def report_serializer():
+    return URLSafeTimedSerializer(app.secret_key, salt="solvfix-email-report-v1")
+
+
+def render_report(r, aid=None, created=None, capture_error=None, capture_saved=False, capture_email="", status=200):
+    # Signed snapshot lets guests keep seeing their actual report after capture without
+    # storing guest audits, recrawling sources, or trusting editable hidden business data.
+    session.setdefault("form_token", secrets.token_urlsafe(32))
+    context = report_serializer().dumps(dict(report=r, aid=aid, uid=session.get("uid"),
+        csrf=session["form_token"], created=created))
+    return render_template("report.html", r=r, aid=aid, created=created, report_context=context,
+        capture_error=capture_error, capture_saved=capture_saved, capture_email=capture_email), status
+
+
+@app.route("/audit/email-report", methods=["POST"])
+def email_report():
+    check_form_token()
+    token = request.form.get("report_context", "")
+    if len(token) > 200000: abort(400)
+    try:
+        context = report_serializer().loads(token, max_age=86400)
+    except (BadSignature, SignatureExpired):
+        abort(400, description="This report form expired or is invalid. Run a new scan or reopen your saved report.")
+    if context.get("uid") != session.get("uid") or context.get("csrf") != session.get("form_token"):
+        abort(400)
+    aid = context["aid"]
+    if aid is not None: own_audit(aid)
+    r = context["report"]
+    email = request.form.get("email", "").strip().lower()
+    if len(email) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+        return render_report(r, aid, context.get("created"), capture_error="Enter a valid email address (up to 254 characters).",
+                             capture_email=email[:254], status=400)
+    business = r["business"]
+    note = (f"Business Exposure Scan follow-up requested. Audit id: {aid if aid is not None else 'guest (report not stored)'}. "
+            f"Address: {business.get('address', '')}. Exposure / NAP match score: {r['overall']}%. "
+            "Visitor requested follow-up / report delivery. No automated email has been sent.")
+    db.x("INSERT INTO inquiries(user_id,name,email,phone,business,city,plan,message) VALUES(?,?,?,?,?,?,?,?)",
+         (session.get("uid"), business.get("name", ""), email, business.get("phone", ""),
+          business.get("name", ""), business.get("city", ""), "free-scan", note))
+    return render_report(r, aid, context.get("created"), capture_saved=True, capture_email=email)
+
 
 def own_audit(aid):
     a = db.q("SELECT * FROM audits WHERE id=? AND user_id=?", (aid, session["uid"]), one=True)
@@ -108,9 +151,9 @@ def dashboard():
 @login_required
 def audit_view(aid):
     a = own_audit(aid); res = json.loads(a["results_json"])
-    r = dict(business=dict(name=a["name"], address=a["address"], phone=a["phone"]), results=res, overall=a["score"],
+    r = dict(business=dict(name=a["name"], address=a["address"], phone=a["phone"], city=a["city"]), results=res, overall=a["score"],
              listed=sum(1 for x in res if "score" in x), checked=sum(1 for x in res if x["status"] not in ("Skipped", "Error")))
-    return render_template("report.html", r=r, aid=aid, created=a["created"])
+    return render_report(r, aid, created=a["created"])
 
 # ---------- Bot 2: Fix ----------
 @app.route("/audits/<int:aid>/fix", methods=["GET", "POST"])
@@ -194,7 +237,7 @@ def social_csv(bid):
 
 
 # ---------- local-business services and qualified leads ----------
-PLANS = {"free": "Free Audit · $0", "starter": "Starter · $49/mo", "growth": "Growth · $99/mo",
+PLANS = {"free-scan": "Free Business Exposure Scan follow-up", "free": "Free Audit · $0", "starter": "Starter · $49/mo", "growth": "Growth · $99/mo",
          "done-for-you": "Done-for-you · $199/mo + $299 setup", "gbp": "Google Business Profile checkup",
          "citations": "Local visibility / citation help", "reviews": "Review request kit", "competitors": "Competitor gap check"}
 

@@ -1,13 +1,13 @@
-{% extends "base.html" %}{% block title %}Social posts{% endblock %}{% block body %}
-<h1>Social post drafts</h1><p class=mute>Bot 4 · 30 drafts a month. Drafts only: nothing is ever posted. Edit, copy, or download, then post yourself.</p>
+{% extends "base.html" %}{% block title %}Social posts{% endblock %}{% block body %}<span class="eyebrow">Draft. Review. Publish yourself.</span>
+<h1>Social post drafts</h1><p class=mute>30 drafts a month. Drafts only: nothing is ever posted. Edit, copy, or download, then post yourself.</p>
 {% if posts is none %}<div class=card><form method=post><div class=grid>
-<div><label>Business name</label><input name=name required value="{{last.name if last}}"></div><div><label>Business type</label><input name=btype required placeholder="bakery, plumber, salon…"></div>
-<div><label>City</label><input name=city required value="{{last.city if last}}"></div>
-<div><label>Tone</label><select name=tone><option>friendly</option><option>professional</option><option>playful</option><option>warm</option></select></div>
-<div><label>Month</label><input type=month name=month value="{{month}}"></div></div><button>Generate 30 drafts</button></form></div>
+<div><label for="field-name">Business name</label><input id="field-name" name=name required value="{{last.name if last}}"></div><div><label for="field-btype">Business type</label><input id="field-btype" name=btype required placeholder="bakery, plumber, salon…"></div>
+<div><label for="field-city">City</label><input id="field-city" name=city required value="{{last.city if last}}"></div>
+<div><label for="field-tone">Tone</label><select id="field-tone" name=tone><option>friendly</option><option>professional</option><option>playful</option><option>warm</option></select></div>
+<div><label for="field-month">Month</label><input id="field-month" type=month name=month value="{{month}}"></div></div><button>Generate 30 drafts</button></form></div>
 {% else %}<div class=card><h3>{{b.business}} · {{b.month}}</h3><p class=mute>Source: {{b.source}} · {{posts|length}} drafts</p>
-<a class="btn small" href="/social/{{b.id}}.csv">Download CSV</a> <a class="btn small ghost" href="/social">New batch</a></div>
+<a class="btn small" href="{{url_for('social_csv', bid=b.id)}}">Download CSV</a> <a class="btn small ghost" href="{{url_for('social')}}">New batch</a></div>
 <div class=grid>{% for p in posts %}<div class=card><p class=mute><b>{{p.day}}</b> · {{p.pillar}} <span class="pill dr">draft</span></p>
-<textarea rows=4 id=p{{loop.index}}>{{p.text}}
-{{p.hashtags}}</textarea><button class="small ghost" onclick="navigator.clipboard.writeText(document.getElementById('p{{loop.index}}').value)">Copy</button></div>{% endfor %}</div>{% endif %}
+<label for="p{{loop.index}}">Post draft for {{p.day}}</label><textarea rows=4 id=p{{loop.index}}>{{p.text}}
+{{p.hashtags}}</textarea><button class="small ghost" type="button" data-copy-target="p{{loop.index}}">Copy</button><span class="copy-status" role="status"></span></div>{% endfor %}</div>{% endif %}
 {% endblock %}
