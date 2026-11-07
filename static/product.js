@@ -6,9 +6,49 @@
   menu?.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') !== 'true'; nav.classList.toggle('open', open); menu.setAttribute('aria-expanded', String(open)); menu.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation'); });
   nav?.addEventListener('click', e => { if (e.target.closest('a')) closeMenu(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') { closeMenu(); menu.focus(); } });
-  document.getElementById('align-demo')?.addEventListener('click', e => { const stage = e.currentTarget.closest('.alignment-stage'); const aligned = stage.classList.toggle('locked'); e.currentTarget.setAttribute('aria-pressed', String(aligned)); e.currentTarget.textContent = aligned ? 'Reset the illustration ↗' : 'Align the illustration ↗'; });
+  const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const reduceMotion = motionPreference.matches;
+  const replay = document.getElementById('align-demo');
+  if (replay) {
+    const stage = replay.closest('.alignment-stage');
+    let alignmentTimer;
+    const align = () => stage.classList.add('locked');
+    const play = () => {
+      window.clearTimeout(alignmentTimer);
+      if (motionPreference.matches) { align(); return; }
+      stage.classList.remove('locked');
+      alignmentTimer = window.setTimeout(align, 950);
+    };
+    replay.addEventListener('click', play);
+    motionPreference.addEventListener('change', () => {
+      if (motionPreference.matches) { window.clearTimeout(alignmentTimer); align(); }
+    });
+    play();
+  }
+  // Submit normally to the real audit endpoint; only the waiting UI is enhanced.
+  const scanForm = document.querySelector('[data-scan-form]');
+  if (scanForm) {
+    const submit = scanForm.querySelector('button[type="submit"]');
+    const status = document.getElementById('scan-progress');
+    const initialStatus = status.textContent;
+    const initialLabel = submit.textContent;
+    const reset = () => {
+      scanForm.removeAttribute('aria-busy');
+      submit.disabled = false;
+      submit.textContent = initialLabel;
+      status.textContent = initialStatus;
+    };
+    scanForm.addEventListener('submit', event => {
+      if (scanForm.getAttribute('aria-busy') === 'true') { event.preventDefault(); return; }
+      scanForm.setAttribute('aria-busy', 'true');
+      submit.disabled = true;
+      submit.textContent = 'Checking available sources…';
+      status.textContent = 'Checking available sources… this can take a moment';
+    });
+    // Back/forward cache must not leave an old form disabled.
+    window.addEventListener('pageshow', reset);
+  }
   // Progressive enhancement: content stays visible if JS or observers are unavailable.
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!reduceMotion && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('in'); observer.unobserve(entry.target); } }), {threshold: 0.08});
     document.documentElement.classList.add('js');

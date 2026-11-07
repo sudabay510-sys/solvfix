@@ -305,3 +305,51 @@ def test_production_design_assets_and_links(client):
     import re
     for asset in re.findall(rb'url\(([^)]+)\)', fonts.data):
         assert client.get('/static/'+asset.decode()).status_code == 200
+
+
+def test_report_source_rows_and_metadata(client, monkeypatch):
+    from copy import deepcopy
+    result = deepcopy(FAKE)
+    result['results'].extend([
+        dict(source='Unavailable directory', status='Error', score=10, note='Provider unavailable'),
+        dict(source='Optional directory', status='Skipped'),
+        dict(source='Address only', status='Listed', score=95, found_address='20 Actual Street',
+             details=dict(name=100, address=90, phone=100), missing=[]),
+    ])
+    monkeypatch.setattr(appmod, 'run_audit', lambda biz, use_search=True: {**result, 'business': biz})
+    response, _ = scan_context(client)
+    page = response.data.decode()
+    assert '<title>Exposure scan: Current Salon' in page
+    assert 'Business Exposure Scan for Current Salon' in page
+    assert page.count('class="listing-row source-listing ') == 6
+    assert page.count('source-listing neutral') == 2
+    assert page.count('source-listing warning') == 3  # mismatch, not listed, partial address match
+    assert 'source-listing matched' in page
+    assert '<dd>20 Actual Street</dd>' in page  # Found details do not depend on a URL.
+    assert 'Full details · compact table' in page
+    assert page.index('40%') < page.index('source-results-title') < page.index('Email me this report')
+    assert page.index('Optional directory') < page.index('Email me this report')
+    assert 'Provider unavailable' in page and 'Missing:</strong> website' in page
+
+
+def test_scan_form_progressive_enhancement_and_home_copy(client):
+    page = client.get('/audit').data
+    assert b'data-scan-form method="post"' in page
+    assert b'id="scan-progress"' in page and b'role="status"' in page
+    assert b'aria-describedby="scan-progress"' in page
+    assert b'disabled' not in page  # Still submits without JavaScript.
+    home = client.get('/').data
+    assert b'Helping local businesses since 2019' in home
+    assert b'Replay the illustration' in home
+    assert b'Start with a free Business Exposure Scan.' in home
+
+
+def test_local_woff2_fonts_with_fallbacks(client):
+    import re
+    css = client.get('/static/fonts.css').data
+    assert css.count(b"format('woff2')") == 8
+    assert css.count(b"format('truetype')") == 8
+    for asset in re.findall(rb'url\(([^)]+)\)', css):
+        assert client.get('/static/' + asset.decode()).status_code == 200
+    page = client.get('/audit').data
+    assert page.count(b'as="font" type="font/woff2" crossorigin') == 2
